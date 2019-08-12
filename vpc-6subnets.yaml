@@ -531,7 +531,7 @@ Outputs:
       Name: !Sub "${AWS::StackName}-PrivateSubnet2Id"
   PrivateSubnet3Id:
     Description: Private Subnet3 ID in the  VPC
-    Value: !Ref PrivateSubnet2
+    Value: !Ref PrivateSubnet3
     Export:
       Name: !Sub "${AWS::StackName}-PrivateSubnet3Id"
   #------------------ route tables
@@ -566,3 +566,11 @@ Outputs:
     Value: !Ref VpcInternalDns
     Export:
       Name: !Sub ${AWS::StackName}-VpcInternalDnsId
+  #------------------ Default setting
+  DefaultSecurityGroupId:
+    Description: Default Security Group Id
+    Value: !GetAtt Vpc.DefaultSecurityGroup
+    Export:
+      Name: !Sub ${AWS::StackName}-DefaultSecurityGroupId
+      
+      
