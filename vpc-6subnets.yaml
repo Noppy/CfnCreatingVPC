@@ -552,7 +552,7 @@ Outputs:
       Name: !Sub "${AWS::StackName}-PrivateSubnet2RouteTableId"
   PrivateSubnet3RouteTableId:
     Description: Route table for Private Subnet3
-    Value: !Ref PrivateSubnet2RouteTable
+    Value: !Ref PrivateSubnet3RouteTable
     Export:
       Name: !Sub "${AWS::StackName}-PrivateSubnet3RouteTableId"
   #------------------ Resource DNS name
