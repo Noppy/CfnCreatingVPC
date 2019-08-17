@@ -470,7 +470,7 @@ Resources:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       SubnetId: !Ref PrivateSubnet3
-      RouteTableId: !Ref PrivateSubnet2RouteTable
+      RouteTableId: !Ref PrivateSubnet3RouteTable
   #------------------ Local Domain Name
   VpcInternalDns:
     Type: AWS::Route53::HostedZone
