@@ -311,6 +311,8 @@ Resources:
       RouteTableId: !Ref PublicSubnetRouteTable
       DestinationCidrBlock: 0.0.0.0/0
       GatewayId: !Ref Igw
+    DependsOn:
+      - AttachIgw
   #----
   PrivateSubnet1RouteTable:
     Type: AWS::EC2::RouteTable
