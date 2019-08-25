@@ -201,6 +201,8 @@ Resources:
       RouteTableId: !Ref RouteTable
       DestinationCidrBlock: 0.0.0.0/0
       GatewayId: !Ref Igw
+    DependsOn:
+      - AttachIgw
   #---- Attache to subnets in the  VPC
   RouteTableAssociationSubnet1:
     Type: AWS::EC2::SubnetRouteTableAssociation
