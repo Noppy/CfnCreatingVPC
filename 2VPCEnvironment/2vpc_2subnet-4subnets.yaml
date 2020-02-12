@@ -13,7 +13,7 @@ Parameters:
     Description: Name for the VPC
     Type: String
     AllowedPattern: "[a-zA-Z0-9=-@+?[?]?<?>._]*"
-    Default: MainVPC
+    Default: InternalVPC
     ConstraintDescription: Can contain only ASCII characters.
   InternalVpcCidr:
     Description: CIDR Block for the  VPC
@@ -24,13 +24,13 @@ Parameters:
     AllowedPattern: "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})"
     ConstraintDescription: Must be like 10.1.0.0/16
   #---
-  InternalForntSubnet1Name:
+  InternalFrontSubnet1Name:
     Description: Name for the Front Subnet 1
     Type: String
-    Default: FrontSub1
+    Default: InternalVPCFrontSub1
     AllowedPattern: "[a-zA-Z0-9=-@+?[?]?<?>._]*"
     ConstraintDescription: Can contain only ASCII characters.
-  InternalForntSubnet1Cidr:
+  InternalFrontSubnet1Cidr:
     Description: CIDR Block for the  Front subnet 1
     Type: String
     MinLength: 9
@@ -39,13 +39,13 @@ Parameters:
     AllowedPattern: "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})"
     ConstraintDescription: Must be like 10.1.1.0/24
   #---
-  InternalForntSubnet2Name:
+  InternalFrontSubnet2Name:
     Description: Name for the Front Subnet 2
     Type: String
-    Default: FrontSub2
+    Default: InternalVPCFrontSub2
     AllowedPattern: "[a-zA-Z0-9=-@+?[?]?<?>._]*"
     ConstraintDescription: Can contain only ASCII characters.
-  InternalForntSubnet2Cidr:
+  InternalFrontSubnet2Cidr:
     Description: CIDR Block for the  Front subnet 2
     Type: String
     MinLength: 9
@@ -57,7 +57,7 @@ Parameters:
   InternalBackSubnet1Name:
     Description: Name for the Back Subnet 1
     Type: String
-    Default: BackSubnet1
+    Default: InternalVPCBackSub1
     AllowedPattern: "[a-zA-Z0-9=-@+?[?]?<?>._]*"
     ConstraintDescription: Can contain only ASCII characters.
   InternalBackSubnet1Cidr:
@@ -72,7 +72,7 @@ Parameters:
   InternalBackSubnet2Name:
     Description: Name for the Back Subnet 2
     Type: String
-    Default: BackSub2
+    Default: InternalVPCBackSub2
     AllowedPattern: "[a-zA-Z0-9=-@+?[?]?<?>._]*"
     ConstraintDescription: Can contain only ASCII characters.
   InternalBackSubnet2Cidr:
@@ -81,6 +81,57 @@ Parameters:
     MinLength: 9
     MaxLength: 18
     Default: 10.1.192.0/19
+    AllowedPattern: "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})"
+    ConstraintDescription: Must be like 10.1.1.0/24
+  #------------------
+  ExternalVpcInternalDnsName: 
+    Description: Route53 Private Hosted zone
+    Type: String
+    AllowedPattern: "^([a-z0-9]+(-[a-z0-9]+)*\\.?)+\\.$"
+    Default: "external.local."
+    ConstraintDescription: You can use letters (abc), numbers (123) and dashes/hyphens.
+  ExternalVpcName:
+    Description: Name for the VPC
+    Type: String
+    AllowedPattern: "[a-zA-Z0-9=-@+?[?]?<?>._]*"
+    Default: ExternalVPC
+    ConstraintDescription: Can contain only ASCII characters.
+  ExternalVpcCidr:
+    Description: CIDR Block for the  VPC
+    Type: String
+    MinLength: 9
+    MaxLength: 18
+    Default: 10.2.0.0/16
+    AllowedPattern: "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})"
+    ConstraintDescription: Must be like 10.1.0.0/16
+  #---
+  ExternalFrontSubnet1Name:
+    Description: Name for the Front Subnet 1
+    Type: String
+    Default: ExternalVPCFrontSub1
+    AllowedPattern: "[a-zA-Z0-9=-@+?[?]?<?>._]*"
+    ConstraintDescription: Can contain only ASCII characters.
+  ExternalFrontSubnet1Cidr:
+    Description: CIDR Block for the  Front subnet 1
+    Type: String
+    MinLength: 9
+    MaxLength: 18
+    Default: 10.2.64.0/24
+    AllowedPattern: "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})"
+    ConstraintDescription: Must be like 10.1.1.0/24
+  #---
+  ExternalFrontSubnet2Name:
+    Description: Name for the Front Subnet 2
+    Type: String
+    Default: ExternalVPCFrontSub2
+    AllowedPattern: "[a-zA-Z0-9=-@+?[?]?<?>._]*"
+    ConstraintDescription: Can contain only ASCII characters.
+  ExternalFrontSubnet2Cidr:
+    Description: CIDR Block for the  Front subnet 2
+    Type: String
+    MinLength: 9
+    MaxLength: 18
+    Default: 10.2.128.0/24
     AllowedPattern: "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})"
     ConstraintDescription: Must be like 10.1.1.0/24
   #------------------
@@ -98,14 +149,29 @@ Metadata:
         Label:
           default: "Internal VPC - Subnets Configurations"
         Parameters:
-          - InternalForntSubnet1Name
-          - InternalForntSubnet1Cidr
-          - InternalForntSubnet2Name
-          - InternalForntSubnet2Cidr
+          - InternalFrontSubnet1Name
+          - InternalFrontSubnet1Cidr
+          - InternalFrontSubnet2Name
+          - InternalFrontSubnet2Cidr
           - InternalBackSubnet1Name
           - InternalBackSubnet1Cidr
           - InternalBackSubnet2Name
           - InternalBackSubnet2Cidr
+      -
+        Label:
+          default: "External VPC Configurations"
+        Parameters:
+          - ExternalVpcInternalDnsName
+          - ExternalVpcName
+          - ExternalVpcCidr
+      -
+        Label:
+          default: "External VPC - Subnets Configurations"
+        Parameters:
+          - ExternalFrontSubnet1Name
+          - ExternalFrontSubnet1Cidr
+          - ExternalFrontSubnet2Name
+          - ExternalFrontSubnet2Cidr
 #----------------------------------------------
 Resources:
   #------------------ VPC FlowLog Role
@@ -136,6 +202,7 @@ Resources:
                   - "logs:DescribeLogStreams"
                   - "logs:PutLogEvents"
                 Resource: "*"
+  #------------------------Internal VPC ------------------------
   #------------------ VPC
   InternalVpc:
     Type: AWS::EC2::VPC
@@ -146,12 +213,12 @@ Resources:
       InstanceTenancy: default
       Tags:
         - Key: Name
-          Value: !Ref InternalVpcName
+          Value: !Sub ${InternalVpcName}
   #------------------ Subnet
   InternalFrontSubnet1:
     Type: AWS::EC2::Subnet
     Properties:
-      CidrBlock: !Ref InternalForntSubnet1Cidr
+      CidrBlock: !Ref InternalFrontSubnet1Cidr
       VpcId: !Ref InternalVpc
       AvailabilityZone: !Select
         - 0
@@ -159,11 +226,11 @@ Resources:
       MapPublicIpOnLaunch: False
       Tags:
         - Key: Name
-          Value: !Sub ${InternalForntSubnet1Name}
+          Value: !Ref InternalFrontSubnet1Name
   InternalFrontSubnet2:
     Type: AWS::EC2::Subnet
     Properties:
-      CidrBlock: !Ref InternalForntSubnet2Cidr
+      CidrBlock: !Ref InternalFrontSubnet2Cidr
       VpcId: !Ref InternalVpc
       AvailabilityZone: !Select
         - 1
@@ -171,8 +238,8 @@ Resources:
       MapPublicIpOnLaunch: False
       Tags:
         - Key: Name
-          Value: !Sub ${InternalForntSubnet2Name}
-  InternalBuckSubnet1:
+          Value: !Ref InternalFrontSubnet2Name
+  InternalBackSubnet1:
     Type: AWS::EC2::Subnet
     Properties:
       CidrBlock: !Ref InternalBackSubnet1Cidr
@@ -183,8 +250,8 @@ Resources:
       MapPublicIpOnLaunch: false
       Tags:
         - Key: Name
-          Value: !Sub ${InternalBackSubnet1Name}
-  InternalBuckSubnet2:
+          Value: !Ref InternalBackSubnet1Name
+  InternalBackSubnet2:
     Type: AWS::EC2::Subnet
     Properties:
       CidrBlock: !Ref InternalBackSubnet2Cidr
@@ -195,7 +262,7 @@ Resources:
       MapPublicIpOnLaunch: false
       Tags:
         - Key: Name
-          Value: !Sub ${InternalBackSubnet2Name}
+          Value: !Ref InternalBackSubnet2Name
   #------------------ Route Table
   #----------  VPC Public Route Table
   InternalFrontRouteTable:
@@ -204,7 +271,7 @@ Resources:
       VpcId: !Ref InternalVpc
       Tags:
         - Key: Name
-          Value: !Sub ${VpcName}-InternalFrontRouteTable
+          Value: !Sub ${InternalVpcName}-InternalFrontRouteTable
   #----
   InternalBackSubnet1RouteTable:
     Type: AWS::EC2::RouteTable
@@ -212,7 +279,7 @@ Resources:
       VpcId: !Ref InternalVpc
       Tags:
         - Key: Name
-          Value: !Sub ${VpcName}-InternalBackSubnet1RouteTable
+          Value: !Sub ${InternalVpcName}-InternalBackSubnet1RouteTable
   #----
   InternalBackSubnet2RouteTable:
     Type: AWS::EC2::RouteTable
@@ -220,17 +287,17 @@ Resources:
       VpcId: !Ref InternalVpc
       Tags:
         - Key: Name
-          Value: !Sub ${VpcName}-InternalBackSubnet2RouteTable
+          Value: !Sub ${InternalVpcName}-InternalBackSubnet2RouteTable
   #---- Attache to subnets in the  VPC
-  InternalFrontRouteTableAssociationInternalForntSubnet1:
+  InternalFrontRouteTableAssociationInternalFrontSubnet1:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
-      SubnetId: !Ref InternalForntSubnet1
+      SubnetId: !Ref InternalFrontSubnet1
       RouteTableId: !Ref InternalFrontRouteTable
-  InternalFrontRouteTableAssociationInternalForntSubnet2:
+  InternalFrontRouteTableAssociationInternalFrontSubnet2:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
-      SubnetId: !Ref InternalForntSubnet2
+      SubnetId: !Ref InternalFrontSubnet2
       RouteTableId: !Ref InternalFrontRouteTable
   InternalBackSubnet1RouteTableAssociationInternalBackSubnet1:
     Type: AWS::EC2::SubnetRouteTableAssociation
@@ -253,37 +320,225 @@ Resources:
         - VPCId: !Ref InternalVpc
           VPCRegion: !Ref AWS::Region
   #------------------ Cloudwatch log for Flowlog
-  VPCFlowlog:
+  InternalVPCFlowlog:
     Type: AWS::EC2::FlowLog
     Properties:
       DeliverLogsPermissionArn: !GetAtt FlowlogRole.Arn
-      LogGroupName: !Sub VPCFlowLogs/${VpcName}
+      LogGroupName: !Sub VPCFlowLogs/${InternalVpcName}
       ResourceId: !Ref InternalVpc
       ResourceType: VPC
       TrafficType: ALL
+  #------------------------External VPC ------------------------
+  #------------------ VPC
+  ExternalVpc:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !Ref ExternalVpcCidr
+      EnableDnsSupport: True
+      EnableDnsHostnames: True
+      InstanceTenancy: default
+      Tags:
+        - Key: Name
+          Value: !Sub ${ExternalVpcName}
+  #------------------ Internet GW
+  ExternalIgw:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Sub ${ExternalVpcName}-IGW
+  ExternalAttachIgw:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      InternetGatewayId: !Ref ExternalIgw
+      VpcId: !Ref ExternalVpc
+    DependsOn:
+      - ExternalVpc
+      - ExternalIgw
+  #------------------ Subnet
+  ExternalFrontSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: !Ref ExternalFrontSubnet1Cidr
+      VpcId: !Ref ExternalVpc
+      AvailabilityZone: !Select
+        - 0
+        - Fn::GetAZs: !Ref 'AWS::Region'
+      MapPublicIpOnLaunch: False
+      Tags:
+        - Key: Name
+          Value: !Ref ExternalFrontSubnet1Name
+  ExternalFrontSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: !Ref ExternalFrontSubnet2Cidr
+      VpcId: !Ref ExternalVpc
+      AvailabilityZone: !Select
+        - 1
+        - Fn::GetAZs: !Ref 'AWS::Region'
+      MapPublicIpOnLaunch: False
+      Tags:
+        - Key: Name
+          Value: !Ref ExternalFrontSubnet2Name
+  #------------------ Route Table
+  #----------  VPC Public Route Table
+  ExternalFrontRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref ExternalVpc
+      Tags:
+        - Key: Name
+          Value: !Sub ${ExternalVpcName}-ExternalFrontRouteTable
+  ExternalVpcInternetRote:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref ExternalFrontRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref ExternalIgw
+    DependsOn:
+      - ExternalAttachIgw
+  #---- Attache to subnets in the  VPC
+  ExternalFrontRouteTableAssociationExternalFrontSubnet1:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref ExternalFrontSubnet1
+      RouteTableId: !Ref ExternalFrontRouteTable
+  ExternalFrontRouteTableAssociationExternalFrontSubnet2:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref ExternalFrontSubnet2
+      RouteTableId: !Ref ExternalFrontRouteTable
+  #------------------ Local Domain Name
+  ExternalVpcExternalDns:
+    Type: AWS::Route53::HostedZone
+    Properties:
+      HostedZoneConfig:
+        Comment: "Resource DNS for  VPC"
+      Name: !Ref ExternalVpcInternalDnsName
+      VPCs:
+        - VPCId: !Ref ExternalVpc
+          VPCRegion: !Ref AWS::Region
+  #------------------ Cloudwatch log for Flowlog
+  ExternalVPCFlowlog:
+    Type: AWS::EC2::FlowLog
+    Properties:
+      DeliverLogsPermissionArn: !GetAtt FlowlogRole.Arn
+      LogGroupName: !Sub VPCFlowLogs/${ExternalVpcName}
+      ResourceId: !Ref ExternalVpc
+      ResourceType: VPC
+      TrafficType: ALL
+  #------------------------VPC Peering ------------------------
+  VPCPeering:
+    Type: AWS::EC2::VPCPeeringConnection
+    Properties:
+      VpcId: !Ref InternalVpc
+      PeerVpcId: !Ref ExternalVpc
+  InternalFrontRouteDestExternalVpc:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref InternalFrontRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      VpcPeeringConnectionId: !Ref VPCPeering
+    DependsOn:
+      - VPCPeering
+  ExternalFrontRouteDestExternalVpc:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref ExternalFrontRouteTable
+      DestinationCidrBlock: !Ref InternalVpcCidr
+      VpcPeeringConnectionId: !Ref VPCPeering
+    DependsOn:
+      - VPCPeering
+
+  #------------------------Security Group ------------------------
+  # External
+  ExternalRdpSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: "RDP for ExternalVPC"
+      GroupName: ExternalRdpSG
+      VpcId: !Ref ExternalVpc
+      SecurityGroupIngress:
+        -
+          IpProtocol: tcp
+          FromPort: 3389
+          ToPort: 3389
+          CidrIp: 0.0.0.0/0
+  ExternalSshSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: "SSH for ExternalVPC"
+      GroupName: ExternalSshSG
+      VpcId: !Ref ExternalVpc
+      SecurityGroupIngress:
+        -
+          IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+  ExternalBastionSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: "For Bastion in ExternalVPC"
+      GroupName: ExternalBastionSG
+      VpcId: !Ref ExternalVpc
+  ExternalClientSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: "For Client in ExternalVPC"
+      GroupName: ExternalClientSG
+      VpcId: !Ref ExternalVpc
+  # Internal
+  InternalRdpSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: "RDP for InternalVPC"
+      GroupName: InternalRdpSG
+      VpcId: !Ref InternalVpc
+      SecurityGroupIngress:
+        -
+          IpProtocol: tcp
+          FromPort: 3389
+          ToPort: 3389
+          SourceSecurityGroupId: !Ref ExternalBastionSG
+  InternalSshSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: "SSH for InternalVPC"
+      GroupName: InternalSshSG
+      VpcId: !Ref InternalVpc
+      SecurityGroupIngress:
+        -
+          IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          SourceSecurityGroupId: !Ref ExternalBastionSG
+
+
 Outputs:
+  #----------------------------Internal VPC 
   #------------------ VPC
   InternalVpcId:
     Description:  VPC ID
     Value: !Ref InternalVpc
     Export:
       Name: !Sub "${AWS::StackName}-InternalVpcId"
-  VpcCidr:
+  InternalVpcCidr:
     Description:  VPC CIDR
     Value: !Ref InternalVpcCidr
     Export:
-      Name: !Sub "${AWS::StackName}-VpcCidr"
+      Name: !Sub "${AWS::StackName}-InternalVpcCidr"
   #------------------ Subnet
-  InternalForntSubnet1Id:
+  InternalFrontSubnet1Id:
     Description: Front Subnet1 ID in the  VPC
-    Value: !Ref InternalForntSubnet1
+    Value: !Ref InternalFrontSubnet1
     Export:
-      Name: !Sub "${AWS::StackName}-InternalForntSubnet1Id"
-  InternalForntSubnet2Id:
+      Name: !Sub "${AWS::StackName}-InternalFrontSubnet1Id"
+  InternalFrontSubnet2Id:
     Description: Front Subnet2 ID in the  VPC
-    Value: !Ref InternalForntSubnet2
+    Value: !Ref InternalFrontSubnet2
     Export:
-      Name: !Sub "${AWS::StackName}-InternalForntSubnet2Id"
+      Name: !Sub "${AWS::StackName}-InternalFrontSubnet2Id"
   InternalBackSubnet1Id:
     Description: Back Subnet1 ID in the  VPC
     Value: !Ref InternalBackSubnet1
@@ -311,13 +566,83 @@ Outputs:
     Export:
       Name: !Sub "${AWS::StackName}-InternalBackSubnet2RouteTableId"
   #------------------ Resource DNS name
-  VpcInternalDnsName:
+  InternalVpcInternalDnsName:
     Description: Resource DNS zone name in the  Vpc
     Value: !Ref InternalVpcInternalDnsName
     Export:
-      Name: !Sub ${AWS::StackName}-VpcInternalDnsName
-  VpcInternalDnsId:
+      Name: !Sub ${AWS::StackName}-InternalVpcInternalDnsName
+  InternalVpcInternalDnsId:
     Description: Resource DNS zone id in the  VPC
     Value: !Ref InternalVpcInternalDns
     Export:
-      Name: !Sub ${AWS::StackName}-VpcInternalDnsId
+      Name: !Sub ${AWS::StackName}-InternalVpcInternalDnsId
+  #----------------------------External VPC 
+  #------------------ VPC
+  ExternalVpcId:
+    Description:  VPC ID
+    Value: !Ref ExternalVpc
+    Export:
+      Name: !Sub "${AWS::StackName}-ExternalVpcId"
+  ExternalVpcCidr:
+    Description:  VPC CIDR
+    Value: !Ref ExternalVpcCidr
+    Export:
+      Name: !Sub "${AWS::StackName}-ExternalVpcCidr"
+  #------------------ Subnet
+  ExternalFrontSubnet1Id:
+    Description: Front Subnet1 ID in the  VPC
+    Value: !Ref ExternalFrontSubnet1
+    Export:
+      Name: !Sub "${AWS::StackName}-ExternalFrontSubnet1Id"
+  ExternalFrontSubnet2Id:
+    Description: Front Subnet2 ID in the  VPC
+    Value: !Ref ExternalFrontSubnet2
+    Export:
+      Name: !Sub "${AWS::StackName}-ExternalFrontSubnet2Id"
+  #------------------ route tables
+  ExternalFrontRouteTableId:
+    Description: Route table for Front Subnet
+    Value: !Ref ExternalFrontRouteTable
+    Export:
+      Name: !Sub "${AWS::StackName}-ExternalFrontRouteTableId"
+  #------------------ Resource DNS name
+  ExternalVpcInternalDnsName:
+    Description: Resource DNS zone name in the  Vpc
+    Value: !Ref ExternalVpcInternalDnsName
+    Export:
+      Name: !Sub ${AWS::StackName}-ExternalVpcInternalDnsName
+  ExternalVpcExternalDnsId:
+    Description: Resource DNS zone id in the  VPC
+    Value: !Ref ExternalVpcExternalDns
+    Export:
+      Name: !Sub ${AWS::StackName}-ExternalVpcExternalDnsId
+  ExternalRdpSGId:
+    Description: Security Group ID for ExternalRdpSG
+    Value: !Ref ExternalRdpSG
+    Export:
+      Name: !Sub ${AWS::StackName}-ExternalRdpSGId
+  ExternalSshSGId:
+    Description: Security Group ID for ExternalSshSG
+    Value: !Ref ExternalSshSG
+    Export:
+      Name: !Sub ${AWS::StackName}-ExternalSshSGId
+  ExternalBastionSGId:
+    Description: Security Group ID for ExternalBastionSG
+    Value: !Ref ExternalBastionSG
+    Export:
+      Name: !Sub ${AWS::StackName}-ExternalBastionSGId
+  ExternalClientSGId:
+    Description: Security Group ID for ExternalClientSG
+    Value: !Ref ExternalClientSG
+    Export:
+      Name: !Sub ${AWS::StackName}-ExternalClientSGId
+  InternalRdpSGId:
+    Description: Security Group ID for InternalRdpSG
+    Value: !Ref InternalRdpSG
+    Export:
+      Name: !Sub ${AWS::StackName}-InternalRdpSGId
+  InternalSshSGId:
+    Description: Security Group ID for InternalSshSG
+    Value: !Ref InternalSshSG
+    Export:
+      Name: !Sub ${AWS::StackName}-InternalSshSGId
