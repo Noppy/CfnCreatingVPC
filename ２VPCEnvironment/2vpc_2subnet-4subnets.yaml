@@ -1,0 +1,323 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Deploy a VPC and 4 subnets
+#----------------------------------------------
+Parameters:
+  #------------------
+  InternalVpcInternalDnsName: 
+    Description: Route53 Private Hosted zone
+    Type: String
+    AllowedPattern: "^([a-z0-9]+(-[a-z0-9]+)*\\.?)+\\.$"
+    Default: "internal.local."
+    ConstraintDescription: You can use letters (abc), numbers (123) and dashes/hyphens.
+  InternalVpcName:
+    Description: Name for the VPC
+    Type: String
+    AllowedPattern: "[a-zA-Z0-9=-@+?[?]?<?>._]*"
+    Default: InternalVPC
+    ConstraintDescription: Can contain only ASCII characters.
+  InternalVpcCidr:
+    Description: CIDR Block for the  VPC
+    Type: String
+    MinLength: 9
+    MaxLength: 18
+    Default: 10.1.0.0/16
+    AllowedPattern: "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})"
+    ConstraintDescription: Must be like 10.1.0.0/16
+  #---
+  InternalForntSubnet1Name:
+    Description: Name for the Front Subnet 1
+    Type: String
+    Default: FrontSub1
+    AllowedPattern: "[a-zA-Z0-9=-@+?[?]?<?>._]*"
+    ConstraintDescription: Can contain only ASCII characters.
+  InternalForntSubnet1Cidr:
+    Description: CIDR Block for the  Front subnet 1
+    Type: String
+    MinLength: 9
+    MaxLength: 18
+    Default: 10.1.64.0/24
+    AllowedPattern: "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})"
+    ConstraintDescription: Must be like 10.1.1.0/24
+  #---
+  InternalForntSubnet2Name:
+    Description: Name for the Front Subnet 2
+    Type: String
+    Default: FrontSub2
+    AllowedPattern: "[a-zA-Z0-9=-@+?[?]?<?>._]*"
+    ConstraintDescription: Can contain only ASCII characters.
+  InternalForntSubnet2Cidr:
+    Description: CIDR Block for the  Front subnet 2
+    Type: String
+    MinLength: 9
+    MaxLength: 18
+    Default: 10.1.128.0/24
+    AllowedPattern: "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})"
+    ConstraintDescription: Must be like 10.1.1.0/24
+  #---
+  InternalBackSubnet1Name:
+    Description: Name for the Back Subnet 1
+    Type: String
+    Default: BackSubnet1
+    AllowedPattern: "[a-zA-Z0-9=-@+?[?]?<?>._]*"
+    ConstraintDescription: Can contain only ASCII characters.
+  InternalBackSubnet1Cidr:
+    Description: CIDR Block for the  private subnet 1
+    Type: String
+    MinLength: 9
+    MaxLength: 18
+    Default: 10.1.160.0/19
+    AllowedPattern: "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})"
+    ConstraintDescription: Must be like 10.1.1.0/24
+  #---
+  InternalBackSubnet2Name:
+    Description: Name for the Back Subnet 2
+    Type: String
+    Default: BackSub2
+    AllowedPattern: "[a-zA-Z0-9=-@+?[?]?<?>._]*"
+    ConstraintDescription: Can contain only ASCII characters.
+  InternalBackSubnet2Cidr:
+    Description: CIDR Block for the  Back subnet 2
+    Type: String
+    MinLength: 9
+    MaxLength: 18
+    Default: 10.1.192.0/19
+    AllowedPattern: "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})"
+    ConstraintDescription: Must be like 10.1.1.0/24
+  #------------------
+Metadata: 
+  AWS::CloudFormation::Interface: 
+    ParameterGroups: 
+      -
+        Label:
+          default: "Internal VPC Configurations"
+        Parameters:
+          - InternalVpcInternalDnsName
+          - InternalVpcName
+          - InternalVpcCidr
+      -
+        Label:
+          default: "Internal VPC - Subnets Configurations"
+        Parameters:
+          - InternalForntSubnet1Name
+          - InternalForntSubnet1Cidr
+          - InternalForntSubnet2Name
+          - InternalForntSubnet2Cidr
+          - InternalBackSubnet1Name
+          - InternalBackSubnet1Cidr
+          - InternalBackSubnet2Name
+          - InternalBackSubnet2Cidr
+#----------------------------------------------
+Resources:
+  #------------------ VPC FlowLog Role
+  FlowlogRole:
+    Type: "AWS::IAM::Role"
+    Properties: 
+      Path: "/"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - vpc-flow-logs.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Policies:
+        -
+          PolicyName: "Flowlog"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement: 
+              - Effect: Allow
+                Action: 
+                  - "logs:CreateLogGroup"
+                  - "logs:CreateLogStream"
+                  - "logs:DescribeLogGroups"
+                  - "logs:DescribeLogStreams"
+                  - "logs:PutLogEvents"
+                Resource: "*"
+  #------------------ VPC
+  InternalVpc:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !Ref InternalVpcCidr
+      EnableDnsSupport: True
+      EnableDnsHostnames: True
+      InstanceTenancy: default
+      Tags:
+        - Key: Name
+          Value: !Sub ${InternalVpcName}
+  #------------------ Subnet
+  InternalFrontSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: !Ref InternalForntSubnet1Cidr
+      VpcId: !Ref InternalVpc
+      AvailabilityZone: !Select
+        - 0
+        - Fn::GetAZs: !Ref 'AWS::Region'
+      MapPublicIpOnLaunch: False
+      Tags:
+        - Key: Name
+          Value: !Sub ${InternalForntSubnet1Name}
+  InternalFrontSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: !Ref InternalForntSubnet2Cidr
+      VpcId: !Ref InternalVpc
+      AvailabilityZone: !Select
+        - 1
+        - Fn::GetAZs: !Ref 'AWS::Region'
+      MapPublicIpOnLaunch: False
+      Tags:
+        - Key: Name
+          Value: !Sub ${InternalForntSubnet2Name}
+  InternalBuckSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: !Ref InternalBackSubnet1Cidr
+      VpcId: !Ref InternalVpc
+      AvailabilityZone: !Select
+        - 0
+        - Fn::GetAZs: !Ref 'AWS::Region'
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: !Sub ${InternalBackSubnet1Name}
+  InternalBuckSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: !Ref InternalBackSubnet2Cidr
+      VpcId: !Ref InternalVpc
+      AvailabilityZone: !Select
+        - 1
+        - Fn::GetAZs: !Ref 'AWS::Region'
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: !Sub ${InternalBackSubnet2Name}
+  #------------------ Route Table
+  #----------  VPC Public Route Table
+  InternalFrontRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref InternalVpc
+      Tags:
+        - Key: Name
+          Value: !Sub ${InternalVpcName}-InternalFrontRouteTable
+  #----
+  InternalBackSubnet1RouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref InternalVpc
+      Tags:
+        - Key: Name
+          Value: !Sub ${InternalVpcName}-InternalBackSubnet1RouteTable
+  #----
+  InternalBackSubnet2RouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref InternalVpc
+      Tags:
+        - Key: Name
+          Value: !Sub ${InternalVpcName}-InternalBackSubnet2RouteTable
+  #---- Attache to subnets in the  VPC
+  InternalFrontRouteTableAssociationInternalForntSubnet1:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref InternalForntSubnet1
+      RouteTableId: !Ref InternalFrontRouteTable
+  InternalFrontRouteTableAssociationInternalForntSubnet2:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref InternalForntSubnet2
+      RouteTableId: !Ref InternalFrontRouteTable
+  InternalBackSubnet1RouteTableAssociationInternalBackSubnet1:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref InternalBackSubnet1
+      RouteTableId: !Ref InternalBackSubnet1RouteTable 
+  InternalBackSubnet2RouteTableAssociationInternalBackSubnet2:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref InternalBackSubnet2
+      RouteTableId: !Ref InternalBackSubnet2RouteTable
+  #------------------ Local Domain Name
+  InternalVpcInternalDns:
+    Type: AWS::Route53::HostedZone
+    Properties:
+      HostedZoneConfig:
+        Comment: "Resource DNS for  VPC"
+      Name: !Ref InternalVpcInternalDnsName
+      VPCs:
+        - VPCId: !Ref InternalVpc
+          VPCRegion: !Ref AWS::Region
+  #------------------ Cloudwatch log for Flowlog
+  VPCFlowlog:
+    Type: AWS::EC2::FlowLog
+    Properties:
+      DeliverLogsPermissionArn: !GetAtt FlowlogRole.Arn
+      LogGroupName: !Sub VPCFlowLogs/${InternalVpcName}
+      ResourceId: !Ref InternalVpc
+      ResourceType: VPC
+      TrafficType: ALL
+Outputs:
+  #------------------ VPC
+  InternalVpcId:
+    Description:  VPC ID
+    Value: !Ref InternalVpc
+    Export:
+      Name: !Sub "${AWS::StackName}-InternalVpcId"
+  VpcCidr:
+    Description:  VPC CIDR
+    Value: !Ref InternalVpcCidr
+    Export:
+      Name: !Sub "${AWS::StackName}-VpcCidr"
+  #------------------ Subnet
+  InternalForntSubnet1Id:
+    Description: Front Subnet1 ID in the  VPC
+    Value: !Ref InternalForntSubnet1
+    Export:
+      Name: !Sub "${AWS::StackName}-InternalForntSubnet1Id"
+  InternalForntSubnet2Id:
+    Description: Front Subnet2 ID in the  VPC
+    Value: !Ref InternalForntSubnet2
+    Export:
+      Name: !Sub "${AWS::StackName}-InternalForntSubnet2Id"
+  InternalBackSubnet1Id:
+    Description: Back Subnet1 ID in the  VPC
+    Value: !Ref InternalBackSubnet1
+    Export:
+      Name: !Sub "${AWS::StackName}-InternalBackSubnet1Id"
+  InternalBackSubnet2Id:
+    Description: Back Subnet2 ID in the  VPC
+    Value: !Ref InternalBackSubnet2
+    Export:
+      Name: !Sub "${AWS::StackName}-InternalBackSubnet2Id"
+  #------------------ route tables
+  InternalFrontRouteTableId:
+    Description: Route table for Front Subnet
+    Value: !Ref InternalFrontRouteTable
+    Export:
+      Name: !Sub "${AWS::StackName}-InternalFrontRouteTableId"
+  InternalBackSubnet1RouteTableId:
+    Description: Route table for Back Subnet1
+    Value: !Ref InternalBackSubnet1RouteTable
+    Export:
+      Name: !Sub "${AWS::StackName}-InternalBackSubnet1RouteTableId"
+  InternalBackSubnet2RouteTableId:
+    Description: Route table for Back Subnet2
+    Value: !Ref InternalBackSubnet2RouteTable
+    Export:
+      Name: !Sub "${AWS::StackName}-InternalBackSubnet2RouteTableId"
+  #------------------ Resource DNS name
+  VpcInternalDnsName:
+    Description: Resource DNS zone name in the  Vpc
+    Value: !Ref InternalVpcInternalDnsName
+    Export:
+      Name: !Sub ${AWS::StackName}-VpcInternalDnsName
+  VpcInternalDnsId:
+    Description: Resource DNS zone id in the  VPC
+    Value: !Ref InternalVpcInternalDns
+    Export:
+      Name: !Sub ${AWS::StackName}-VpcInternalDnsId
