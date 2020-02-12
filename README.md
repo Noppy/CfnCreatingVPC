@@ -38,17 +38,26 @@ CFN_STACK_PARAMETERS='
 ]'
 
 aws --profile ${PROFILE} cloudformation create-stack \
-    --stack-name SGWPoC-VPC \
+    --stack-name VPC \
     --template-body "file://./vpc-4subnets.yaml" \
     --parameters "${CFN_STACK_PARAMETERS}" \
     --capabilities CAPABILITY_IAM ;
 ```
 
+- パラメータ説明
+    - InternetAccess : trueにするとIGWがアタッチされます
+    - EnableNatGW : InternetAccessとEnableNatGW両方がTrueの場合, NatGWが作成されます
+    - DnsSupport : VPCのDnsSupportの有効・無効設定
+    - DnsHostnames : VPCのDnsHostnamesの有効・無効設定
+
 # 複合型VPC作成のCloudFormationテンプレート
+４つのサブネットを持つInternalVPCと、Internetフェンシングする2サブネットを持つExternalVPCを作成し、VPC Peeringで接続する構成です。
 <img src="./Documents/arch1.png" whdth=500>
+
+利用方法
 ```shell
 aws --profile ${PROFILE} cloudformation create-stack \
-    --stack-name FSx-VPC \
+    --stack-name VPC \
     --template-body "file://./2VPCEnvironment/2vpc_2subnet-4subnets.yaml" \
     --capabilities CAPABILITY_IAM ;
 ```
