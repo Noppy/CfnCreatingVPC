@@ -18,6 +18,12 @@ Parameters:
       - false
     ConstraintDescription: Must specify true or false.
   #------------------
+  VpcInternalDnsNameEnable:
+    Description: (required)If set private hosted zone, VpcInternalDnsNameEnable is true.
+    Type: String
+    AllowedValues:
+      - true
+      - false
   VpcInternalDnsName: 
     Description: Route53 Private Hosted zone
     Type: String
@@ -120,7 +126,6 @@ Metadata:
         Parameters:
           - InternetAccess
           - EnableNatGW
-          - VpcInternalDnsName
           - VpcName
           - VpcCidr
           - DnsSupport
@@ -137,10 +142,17 @@ Metadata:
           - PrivateSubnet1Cidr
           - PrivateSubnet2Name
           - PrivateSubnet2Cidr
+      -
+        Label:
+          default: "Private Hosted zone"
+        Parameters:
+          - VpcInternalDnsName
+          - VpcInternalDnsNameEnable
 #----------------------------------------------
 Conditions: 
   CheckInternetAccess: !Equals [ !Ref InternetAccess, true ]
   CreateNatGWs: !And [ !Equals [ !Ref InternetAccess, true ], !Equals [ !Ref EnableNatGW, true ] ]
+  CheckVpcInternalDnsNameEnable: !Equals [ !Ref VpcInternalDnsNameEnable, true ]
 #----------------------------------------------
 Resources:
   #------------------ VPC FlowLog Role
@@ -367,6 +379,7 @@ Resources:
   #------------------ Local Domain Name
   VpcInternalDns:
     Type: AWS::Route53::HostedZone
+    Condition: CheckVpcInternalDnsNameEnable
     Properties:
       HostedZoneConfig:
         Comment: "Resource DNS for  VPC"
@@ -435,11 +448,13 @@ Outputs:
   #------------------ Resource DNS name
   VpcInternalDnsName:
     Description: Resource DNS zone name in the  Vpc
+    Condition: CheckVpcInternalDnsNameEnable
     Value: !Ref VpcInternalDnsName
     Export:
       Name: !Sub ${AWS::StackName}-VpcInternalDnsName
   VpcInternalDnsId:
     Description: Resource DNS zone id in the  VPC
+    Condition: CheckVpcInternalDnsNameEnable
     Value: !Ref VpcInternalDns
     Export:
       Name: !Sub ${AWS::StackName}-VpcInternalDnsId
